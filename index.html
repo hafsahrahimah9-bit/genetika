@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebAR — Materi Genetika IPA | Hafsah Rahimah</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+  :root {
+    --dna-green: #00ff9d;
+    --dna-blue: #00cfff;
+    --dna-purple: #b400ff;
+    --dna-pink: #ff2d78;
+    --dna-yellow: #ffe600;
+    --bg-dark: #020b14;
+    --bg-panel: rgba(0, 20, 40, 0.85);
+    --border-glow: rgba(0,207,255,0.35);
+    --text-main: #e8f8ff;
+    --text-dim: #7ab8d4;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── STARFIELD BACKGROUND ── */
+  #starfield {
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse at 20% 30%, #001a33 0%, #020b14 60%);
+    overflow: hidden;
+  }
+  .star {
+    position: absolute; border-radius: 50%;
+    background: white; animation: twinkle 3s infinite alternate;
+  }
+  @keyframes twinkle { from{opacity:.2;transform:scale(1)} to{opacity:1;transform:scale(1.4)} }
+
+  /* ── LAYOUT ── */
+  #app { position:relative; z-index:1; display:flex; flex-direction:column; min-height:100vh; }
+
+  /* ── HEADER ── */
+  header {
+    padding: 18px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border-glow);
+    backdrop-filter: blur(12px);
+    background: rgba(2,11,20,0.7);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.05rem; font-weight: 900;
+    background: linear-gradient(135deg, var(--dna-blue), var(--dna-green));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: 2px;
+  }
+  .subtitle { font-size:.75rem; color:var(--text-dim); letter-spacing:3px; text-transform:uppercase; margin-top:2px; }
+
+  .header-right { text-align:right; }
+  .author-badge {
+    font-size: .72rem; color: var(--dna-yellow);
+    letter-spacing: 1.5px; text-transform: uppercase;
+    border: 1px solid rgba(255,230,0,.3);
+    padding: 4px 10px; border-radius: 20px;
+    backdrop-filter: blur(4px);
+  }
+
+  nav {
+    display: flex; gap: 8px; margin-top: 8px; justify-content: flex-end; flex-wrap: wrap;
+  }
+  nav button {
+    font-family: 'Rajdhani'; font-size: .8rem; font-weight: 600;
+    background: rgba(0,207,255,.08); border: 1px solid var(--border-glow);
+    color: var(--dna-blue); padding: 5px 14px; border-radius: 4px;
+    cursor: pointer; transition: all .2s; letter-spacing: 1px;
+  }
+  nav button.active, nav button:hover {
+    background: rgba(0,207,255,.2); color: #fff; border-color: var(--dna-blue);
+    box-shadow: 0 0 12px rgba(0,207,255,.3);
+  }
+
+  /* ── MAIN CONTENT ── */
+  main {
+    flex: 1; display: grid;
+    grid-template-columns: 300px 1fr;
+    grid-template-rows: 1fr;
+    gap: 0;
+    height: calc(100vh - 90px);
+  }
+
+  /* ── SIDEBAR ── */
+  aside {
+    border-right: 1px solid var(--border-glow);
+    background: var(--bg-panel);
+    backdrop-filter: blur(16px);
+    padding: 20px 16px;
+    overflow-y: auto;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  aside::-webkit-scrollbar { width: 4px; }
+  aside::-webkit-scrollbar-track { background: transparent; }
+  aside::-webkit-scrollbar-thumb { background: var(--dna-blue); border-radius: 4px; }
+
+  .panel-section { display: flex; flex-direction: column; gap: 8px; }
+  .panel-label {
+    font-family: 'Space Mono', monospace;
+    font-size: .65rem; color: var(--dna-green);
+    letter-spacing: 3px; text-transform: uppercase;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(0,255,157,.15);
+  }
+
+  .topic-btn {
+    font-family: 'Rajdhani'; font-size: .88rem; font-weight: 600;
+    background: rgba(255,255,255,.03); border: 1px solid rgba(0,207,255,.15);
+    color: var(--text-dim); padding: 9px 12px; border-radius: 6px;
+    cursor: pointer; transition: all .22s; text-align: left;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .topic-btn .icon { font-size: 1.1rem; }
+  .topic-btn:hover, .topic-btn.active {
+    background: rgba(0,207,255,.12); color: #fff;
+    border-color: var(--dna-blue);
+    box-shadow: 0 0 16px rgba(0,207,255,.18);
+    transform: translateX(3px);
+  }
+  .topic-btn.active { border-color: var(--dna-green); color: var(--dna-green); }
+
+  .control-row { display: flex; flex-direction: column; gap: 4px; }
+  .control-label { font-size: .75rem; color: var(--text-dim); letter-spacing: 1px; }
+  input[type=range] {
+    width: 100%; accent-color: var(--dna-blue);
+    height: 4px; border-radius: 4px; cursor: pointer;
+  }
+
+  .color-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .color-dot {
+    width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; transition: all .18s;
+  }
+  .color-dot:hover, .color-dot.active {
+    border-color: #fff;
+    transform: scale(1.2);
+    box-shadow: 0 0 10px currentColor;
+  }
+
+  .ar-btn {
+    font-family: 'Orbitron'; font-size: .8rem; font-weight: 700;
+    background: linear-gradient(135deg, var(--dna-purple), var(--dna-pink));
+    border: none; color: #fff; padding: 12px;
+    border-radius: 8px; cursor: pointer; letter-spacing: 2px;
+    width: 100%; margin-top: auto;
+    box-shadow: 0 0 24px rgba(180,0,255,.4);
+    transition: all .25s;
+    animation: pulse-ar 2s infinite;
+  }
+  @keyframes pulse-ar {
+    0%,100%{box-shadow:0 0 24px rgba(180,0,255,.4)}
+    50%{box-shadow:0 0 40px rgba(255,45,120,.6)}
+  }
+  .ar-btn:hover { transform: scale(1.03); filter: brightness(1.15); }
+
+  /* ── CANVAS AREA ── */
+  #canvas-area {
+    position: relative; overflow: hidden;
+    background: radial-gradient(ellipse at center, #001428 0%, var(--bg-dark) 80%);
+  }
+
+  canvas#mainCanvas {
+    width: 100%; height: 100%;
+    display: block;
+  }
+
+  /* ── INFO OVERLAY ── */
+  #info-overlay {
+    position: absolute; bottom: 24px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(2,11,20,.88);
+    border: 1px solid var(--border-glow);
+    backdrop-filter: blur(12px);
+    border-radius: 12px;
+    padding: 16px 24px;
+    max-width: 520px; width: 90%;
+    transition: all .4s ease;
+  }
+  #info-overlay h3 {
+    font-family: 'Orbitron'; font-size: .95rem;
+    color: var(--dna-green); margin-bottom: 6px; letter-spacing: 1.5px;
+  }
+  #info-overlay p {
+    font-size: .85rem; color: var(--text-main); line-height: 1.6;
+  }
+  #info-overlay .tags {
+    display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;
+  }
+  .tag {
+    font-size: .68rem; font-family: 'Space Mono';
+    background: rgba(0,207,255,.1); border: 1px solid rgba(0,207,255,.3);
+    color: var(--dna-blue); padding: 3px 8px; border-radius: 20px;
+  }
+
+  /* ── AR OVERLAY ── */
+  #ar-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,.92);
+    flex-direction: column; align-items: center; justify-content: center;
+    gap: 16px;
+  }
+  #ar-overlay.show { display: flex; }
+  .ar-frame {
+    width: min(90vw, 500px); aspect-ratio: 9/16;
+    border: 2px solid var(--dna-green);
+    border-radius: 16px;
+    background: #000;
+    position: relative; overflow: hidden;
+    box-shadow: 0 0 60px rgba(0,255,157,.25);
+  }
+  .ar-frame canvas { width:100%;height:100%; }
+  .ar-corners::before, .ar-corners::after {
+    content:''; position:absolute; width:24px;height:24px;
+    border-color:var(--dna-green); border-style:solid;
+  }
+  .ar-corners::before { top:8px;left:8px; border-width:3px 0 0 3px; }
+  .ar-corners::after  { bottom:8px;right:8px; border-width:0 3px 3px 0; }
+  .ar-label {
+    font-family:'Orbitron'; font-size:.75rem; letter-spacing:3px;
+    color:var(--dna-green); animation: blink-ar 1.5s infinite;
+  }
+  @keyframes blink-ar { 0%,100%{opacity:1} 50%{opacity:.3} }
+  #close-ar {
+    font-family:'Orbitron'; font-size:.8rem;
+    background:rgba(255,45,120,.15); border:1px solid var(--dna-pink);
+    color:var(--dna-pink); padding:10px 28px; border-radius:8px;
+    cursor:pointer; letter-spacing:2px;
+  }
+  #close-ar:hover { background:rgba(255,45,120,.3); }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:768px) {
+    main { grid-template-columns:1fr; grid-template-rows:auto 1fr; }
+    aside { max-height:220px; border-right:none; border-bottom:1px solid var(--border-glow); padding:12px; flex-direction:row; flex-wrap:wrap; overflow-x:auto; overflow-y:hidden; }
+    aside::-webkit-scrollbar { height:4px; width:0; }
+  }
+
+  /* ── TOOLTIP LABELS ── */
+  .floating-label {
+    position: absolute;
+    font-family: 'Space Mono'; font-size: .65rem;
+    background: rgba(0,20,40,.85); border: 1px solid rgba(0,207,255,.4);
+    color: var(--dna-blue); padding: 3px 8px; border-radius: 4px;
+    pointer-events: none; white-space: nowrap;
+    transition: opacity .3s;
+  }
+
+  /* ── LEGEND ── */
+  #legend {
+    position: absolute; top: 16px; right: 16px;
+    background: rgba(2,11,20,.8); border:1px solid var(--border-glow);
+    backdrop-filter:blur(8px); border-radius:10px;
+    padding:12px 16px; min-width:160px;
+  }
+  #legend h4 { font-family:'Orbitron'; font-size:.65rem; color:var(--dna-green); letter-spacing:2px; margin-bottom:8px; }
+  .legend-item { display:flex; align-items:center; gap:8px; margin-bottom:5px; font-size:.78rem; color:var(--text-dim); }
+  .legend-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
+</style>
+</head>
+<body>
+
+<!-- STARFIELD -->
+<div id="starfield"></div>
+
+<!-- AR OVERLAY -->
+<div id="ar-overlay">
+  <div class="ar-label">📡 MODE AR AKTIF — ARAHKAN KAMERA KE MARKER</div>
+  <div class="ar-frame ar-corners" id="ar-frame">
+    <canvas id="arCanvas"></canvas>
+  </div>
+  <div style="color:var(--text-dim);font-size:.78rem;text-align:center;max-width:360px">
+    Simulasi WebAR Genetika — struktur 3D ditampilkan di atas dunia nyata
+  </div>
+  <button id="close-ar">✕ KELUAR AR</button>
+</div>
+
+<div id="app">
+  <!-- HEADER -->
+  <header>
+    <div>
+      <div class="logo">WebAR // GENETIKA</div>
+      <div class="subtitle">Materi IPA — Struktur &amp; Pewarisan Sifat</div>
+    </div>
+    <div class="header-right">
+      <div class="author-badge">✦ hafsahrahimah ✦</div>
+      <nav>
+        <button class="active" onclick="setView('3d')">Visualisasi 3D</button>
+        <button onclick="setView('info')">Materi</button>
+        <button onclick="setView('quiz')">Kuis</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+    <!-- SIDEBAR -->
+    <aside>
+      <div class="panel-section">
+        <div class="panel-label">// Topik</div>
+        <button class="topic-btn active" onclick="setTopic('dna')" id="btn-dna">
+          <span class="icon">🧬</span> DNA
+        </button>
+        <button class="topic-btn" onclick="setTopic('rna')" id="btn-rna">
+          <span class="icon">🔗</span> RNA
+        </button>
+        <button class="topic-btn" onclick="setTopic('kromosom')" id="btn-kromosom">
+          <span class="icon">🎗</span> Kromosom
+        </button>
+        <button class="topic-btn" onclick="setTopic('sel')" id="btn-sel">
+          <span class="icon">🔬</span> Sel & Inti
+        </button>
+        <button class="topic-btn" onclick="setTopic('mitosis')" id="btn-mitosis">
+          <span class="icon">⚙️</span> Mitosis
+        </button>
+        <button class="topic-btn" onclick="setTopic('meiosis')" id="btn-meiosis">
+          <span class="icon">🔀</span> Meiosis
+        </button>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-label">// Kontrol</div>
+        <div class="control-row">
+          <span class="control-label">Kecepatan Rotasi</span>
+          <input type="range" id="speedSlider" min="0" max="100" value="40">
+        </div>
+        <div class="control-row">
+          <span class="control-label">Skala Ukuran</span>
+          <input type="range" id="scaleSlider" min="40" max="150" value="80">
+        </div>
+        <div class="control-row">
+          <span class="control-label">Warna Untaian A</span>
+          <div class="color-row" id="colorRowA"></div>
+        </div>
+        <div class="control-row">
+          <span class="control-label">Warna Untaian B</span>
+          <div class="color-row" id="colorRowB"></div>
+        </div>
+      </div>
+
+      <button class="ar-btn" onclick="openAR()">📷 MASUK MODE AR</button>
+    </aside>
+
+    <!-- CANVAS AREA -->
+    <div id="canvas-area">
+      <canvas id="mainCanvas"></canvas>
+
+      <!-- LEGEND -->
+      <div id="legend">
+        <h4>// Legenda</h4>
+        <div class="legend-item"><div class="legend-dot" style="background:#00ff9d"></div><span id="leg1">Guanin (G)</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#00cfff"></div><span id="leg2">Sitosin (C)</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ff2d78"></div><span id="leg3">Adenin (A)</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ffe600"></div><span id="leg4">Timin (T)</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#b400ff"></div><span id="leg5">Fosfat</span></div>
+      </div>
+
+      <!-- INFO OVERLAY -->
+      <div id="info-overlay">
+        <h3 id="overlay-title">🧬 DNA — Asam Deoksiribonukleat</h3>
+        <p id="overlay-text">DNA adalah molekul yang membawa informasi genetik semua makhluk hidup. Berbentuk double helix — dua untaian polinukleotida yang saling berlawanan arah, diikat oleh pasangan basa nitrogen: A–T dan G–C.</p>
+        <div class="tags" id="overlay-tags">
+          <span class="tag">Nukleotida</span>
+          <span class="tag">Basa Nitrogen</span>
+          <span class="tag">Double Helix</span>
+          <span class="tag">Watson-Crick</span>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// STARS
+// ─────────────────────────────────────────────
+(function createStars() {
+  const sf = document.getElementById('starfield');
+  for (let i = 0; i < 160; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const sz = Math.random() * 2.5 + 0.5;
+    s.style.cssText = `
+      width:${sz}px;height:${sz}px;
+      left:${Math.random()*100}%;top:${Math.random()*100}%;
+      animation-delay:${Math.random()*4}s;
+      animation-duration:${2+Math.random()*3}s;
+      opacity:${Math.random()*.6+.1};
+    `;
+    sf.appendChild(s);
+  }
+})();
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let currentTopic = 'dna';
+let paused = false;
+let colorA = '#00ff9d', colorB = '#ff2d78';
+let speed = 0.4, scale = 0.8;
+let angle = 0, arAngle = 0;
+let animFrame, arAnimFrame;
+
+const COLORS = ['#00ff9d','#00cfff','#ff2d78','#ffe600','#b400ff','#ff7e00','#ffffff'];
+
+// ─────────────────────────────────────────────
+// COLOR PICKERS
+// ─────────────────────────────────────────────
+function buildColorRow(id, initial, cb) {
+  const row = document.getElementById(id);
+  COLORS.forEach(c => {
+    const d = document.createElement('div');
+    d.className = 'color-dot' + (c === initial ? ' active' : '');
+    d.style.background = c;
+    d.onclick = () => {
+      row.querySelectorAll('.color-dot').forEach(x => x.classList.remove('active'));
+      d.classList.add('active');
+      cb(c);
+    };
+    row.appendChild(d);
+  });
+}
+buildColorRow('colorRowA', colorA, c => { colorA = c; });
+buildColorRow('colorRowB', colorB, c => { colorB = c; });
+
+document.getElementById('speedSlider').oninput = e => speed = e.target.value / 100 * 2;
+document.getElementById('scaleSlider').oninput = e => scale = e.target.value / 80;
+
+// ─────────────────────────────────────────────
+// CANVAS SETUP
+// ─────────────────────────────────────────────
+const canvas = document.getElementById('mainCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  const area = document.getElementById('canvas-area');
+  canvas.width = area.clientWidth;
+  canvas.height = area.clientHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// ─────────────────────────────────────────────
+// TOPIC DATA
+// ─────────────────────────────────────────────
+const topicData = {
+  dna: {
+    title: '🧬 DNA — Asam Deoksiribonukleat',
+    text: 'DNA adalah molekul yang membawa informasi genetik semua makhluk hidup. Berbentuk double helix — dua untaian polinukleotida yang saling berlawanan arah, diikat oleh pasangan basa nitrogen: A–T dan G–C.',
+    tags: ['Nukleotida','Basa Nitrogen','Double Helix','Watson-Crick'],
+    leg: ['Guanin (G)','Sitosin (C)','Adenin (A)','Timin (T)','Fosfat'],
+    draw: drawDNA
+  },
+  rna: {
+    title: '🔗 RNA — Asam Ribonukleat',
+    text: 'RNA merupakan untai tunggal yang membawa instruksi dari DNA ke ribosom. Ada tiga jenis: mRNA (pembawa pesan), tRNA (transfer asam amino), dan rRNA (komponen ribosom).',
+    tags: ['mRNA','tRNA','rRNA','Kodon','Transkripsi'],
+    leg: ['Guanin (G)','Sitosin (C)','Adenin (A)','Urasil (U)','Ribosa'],
+    draw: drawRNA
+  },
+  kromosom: {
+    title: '🎗 Kromosom',
+    text: 'Kromosom adalah struktur kompak DNA yang terbungkus protein histon. Manusia memiliki 46 kromosom (23 pasang). Kromosom terdiri dari kromatid yang dihubungkan oleh sentromer.',
+    tags: ['Sentromer','Kromatid','Histon','46 Kromosom','Kariotipe'],
+    leg: ['Kromatid 1','Kromatid 2','Sentromer','Telomer','DNA'],
+    draw: drawKromosom
+  },
+  sel: {
+    title: '🔬 Sel & Inti Sel (Nukleus)',
+    text: 'Inti sel (nukleus) adalah pusat kendali sel yang menyimpan DNA. Materi genetik terbungkus membran inti yang berlapis ganda dan dilindungi oleh pori-pori nukleus.',
+    tags: ['Nukleus','Nukleolus','Kromatin','Membran Inti','Gen'],
+    leg: ['Membran Inti','Nukleolus','Kromatin','Pori Inti','Sitoplasma'],
+    draw: drawSel
+  },
+  mitosis: {
+    title: '⚙️ Mitosis — Pembelahan Sel Somatik',
+    text: 'Mitosis menghasilkan dua sel anak yang identik dengan sel induk (2n → 2n). Terdiri dari fase: Interfase, Profase, Metafase, Anafase, Telofase, dan Sitokinesis.',
+    tags: ['Profase','Metafase','Anafase','Telofase','2n → 2n'],
+    leg: ['Profase','Metafase','Anafase','Telofase','Sitokinesis'],
+    draw: drawMitosis
+  },
+  meiosis: {
+    title: '🔀 Meiosis — Pembelahan Sel Gamet',
+    text: 'Meiosis menghasilkan empat sel anak dengan setengah jumlah kromosom (2n → n). Terjadi pada pembentukan gamet (sel sperma & ovum). Terdiri dari Meiosis I dan Meiosis II.',
+    tags: ['Meiosis I','Meiosis II','2n → n','Gamet','Rekombinasi'],
+    leg: ['Sel Induk (2n)','Sel Anak 1 (n)','Sel Anak 2 (n)','Crossing Over','Kiasma'],
+    draw: drawMeiosis
+  }
+};
+
+// ─────────────────────────────────────────────
+// DRAW FUNCTIONS
+// ─────────────────────────────────────────────
+const bases = ['G','C','A','T'];
+const baseColors = {'G':'#00ff9d','C':'#00cfff','A':'#ff2d78','T':'#ffe600','U':'#ff7e00'};
+
+function drawDNA(ctx, w, h, a) {
+  const cx = w/2, cy = h/2;
+  const sc = scale;
+  const N = 20, helixR = 60*sc, stepH = 26*sc, totH = N*stepH;
+  const startY = cy - totH/2;
+
+  ctx.save();
+  ctx.translate(cx, 0);
+
+  for (let i = 0; i < N; i++) {
+    const t = i / N;
+    const y = startY + i * stepH;
+    const ax1 = Math.cos(a + i * 0.55) * helixR;
+    const ax2 = -ax1;
+    const opa1 = 0.4 + 0.6*(Math.cos(a + i*0.55)+1)/2;
+    const opa2 = 1 - opa1 + 0.4;
+
+    // Backbone strand A
+    if (i < N-1) {
+      const ny1 = startY + (i+1)*stepH;
+      const nax1 = Math.cos(a + (i+1)*0.55)*helixR;
+      ctx.beginPath();
+      ctx.moveTo(ax1, y); ctx.lineTo(nax1, ny1);
+      ctx.strokeStyle = colorA; ctx.lineWidth = 3.5; ctx.globalAlpha = opa1;
+      ctx.shadowColor = colorA; ctx.shadowBlur = 10;
+      ctx.stroke();
+
+      const nax2 = -Math.cos(a+(i+1)*0.55)*helixR;
+      ctx.beginPath();
+      ctx.moveTo(ax2, y); ctx.lineTo(nax2, ny1);
+      ctx.strokeStyle = colorB; ctx.lineWidth = 3.5; ctx.globalAlpha = opa2;
+      ctx.shadowColor = colorB; ctx.shadowBlur = 10;
+      ctx.stroke();
+    }
+
+    // Base pair rungs (only facing front)
+    if (opa1 > 0.5) {
+      ctx.globalAlpha = 0.7;
+      ctx.shadowColor = '#fff'; ctx.shadowBlur = 4;
+      ctx.strokeStyle = 'rgba(200,240,255,0.35)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(ax1, y); ctx.lineTo(ax2, y); ctx.stroke();
+
+      const base = bases[i % 4];
+      const bColor = baseColors[base];
+      ctx.globalAlpha = opa1;
+      ctx.fillStyle = bColor; ctx.shadowColor = bColor; ctx.shadowBlur = 16;
+      ctx.beginPath(); ctx.arc(ax1 * 0.45, y, 6*sc, 0, Math.PI*2); ctx.fill();
+
+      const base2 = bases[(i+2) % 4];
+      ctx.fillStyle = baseColors[base2];
+      ctx.beginPath(); ctx.arc(ax1 * -0.45, y, 6*sc, 0, Math.PI*2); ctx.fill();
+
+      // Label
+      ctx.globalAlpha = 0.9; ctx.fillStyle = '#fff';
+      ctx.font = `bold ${Math.max(8, 10*sc)}px Space Mono,monospace`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      if (sc > 0.6) {
+        ctx.fillText(base, ax1*0.45, y);
+        ctx.fillText(base2, -ax1*0.45, y);
+      }
+    }
+
+    // Backbone nodes
+    const radius = 7*sc;
+    ctx.globalAlpha = opa1;
+    ctx.fillStyle = colorA; ctx.shadowColor = colorA; ctx.shadowBlur = 20;
+    ctx.beginPath(); ctx.arc(ax1, y, radius, 0, Math.PI*2); ctx.fill();
+
+    ctx.globalAlpha = opa2;
+    ctx.fillStyle = colorB; ctx.shadowColor = colorB; ctx.shadowBlur = 20;
+    ctx.beginPath(); ctx.arc(ax2, y, radius, 0, Math.PI*2); ctx.fill();
+  }
+
+  ctx.restore();
+  ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+}
+
+function drawRNA(ctx, w, h, a) {
+  const cx = w/2, cy = h/2;
+  const sc = scale;
+  const N = 22, helixR = 55*sc, stepH = 24*sc;
+  const totH = N * stepH;
+  const startY = cy - totH/2;
+
+  ctx.save();
+  ctx.translate(cx, 0);
+
+  const rnaColors = ['#00ff9d','#00cfff','#ff2d78','#ff7e00'];
+
+  for (let i = 0; i < N; i++) {
+    const y = startY + i * stepH;
+    const ax = Math.cos(a + i * 0.48) * helixR;
+    const az = Math.sin(a + i * 0.48);
+    const opa = 0.45 + 0.55*(az+1)/2;
+
+    if (i < N-1) {
+      const ny = startY + (i+1)*stepH;
+      const nax = Math.cos(a+(i+1)*0.48)*helixR;
+      ctx.beginPath();
+      ctx.moveTo(ax, y); ctx.lineTo(nax, ny);
+      ctx.strokeStyle = colorA; ctx.lineWidth = 4; ctx.globalAlpha = opa;
+      ctx.shadowColor = colorA; ctx.shadowBlur = 12;
+      ctx.stroke();
+    }
+
+    const bc = rnaColors[i % 4];
+    ctx.globalAlpha = opa;
+    ctx.fillStyle = bc; ctx.shadowColor = bc; ctx.shadowBlur = 18;
+    ctx.beginPath(); ctx.arc(ax, y, 8*sc, 0, Math.PI*2); ctx.fill();
+
+    const rnaB = ['G','C','A','U'];
+    ctx.globalAlpha = Math.min(1, opa+0.1);
+    ctx.fillStyle = '#fff'; ctx.font = `bold ${Math.max(7,9*sc)}px Space Mono,monospace`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    if (sc > 0.55) ctx.fillText(rnaB[i%4], ax, y);
+
+    // Side chains (ribose)
+    ctx.globalAlpha = opa * 0.5;
+    ctx.strokeStyle = '#b400ff'; ctx.lineWidth = 1.5; ctx.shadowBlur = 6; ctx.shadowColor = '#b400ff';
+    ctx.beginPath();
+    ctx.moveTo(ax, y);
+    ctx.lineTo(ax + 22*sc * (az > 0 ? 1 : -1), y + 6*sc);
+    ctx.stroke();
+    ctx.fillStyle = '#b400ff';
+    ctx.beginPath(); ctx.arc(ax + 22*sc*(az>0?1:-1), y+6*sc, 4*sc, 0, Math.PI*2); ctx.fill();
+  }
+
+  ctx.restore();
+  ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+}
+
+function drawKromosom(ctx, w, h, a) {
+  const cx = w/2, cy = h/2;
+  const sc = scale;
+
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(a * 0.4);
+
+  const armLen = 100*sc;
+  const armW = 22*sc;
+
+  function drawArm(x1,y1,x2,y2,color1,color2) {
+    const grad = ctx.createLinearGradient(x1,y1,x2,y2);
+    grad.addColorStop(0, color1);
+    grad.addColorStop(1, color2);
+
+    ctx.shadowColor = color1; ctx.shadowBlur = 20;
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = armW;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+    ctx.stroke();
+
+    // Chromatid bands
+    const segs = 6;
+    for (let i = 1; i < segs; i++) {
+      const t = i/segs;
+      const bx = x1 + (x2-x1)*t;
+      const by = y1 + (y2-y1)*t;
+      ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+      ctx.lineWidth = armW + 2;
+      ctx.globalAlpha = 0.3;
+      ctx.beginPath();
+      const perp = {x: -(y2-y1)/Math.hypot(x2-x1,y2-y1), y: (x2-x1)/Math.hypot(x2-x1,y2-y1)};
+      ctx.moveTo(bx - perp.x*(armW/2+2), by - perp.y*(armW/2+2));
+      ctx.lineTo(bx + perp.x*(armW/2+2), by + perp.y*(armW/2+2));
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // Long arms (p)
+  drawArm(0, 0, -30*sc, -armLen, colorA, colorB);
+  drawArm(0, 0, 30*sc, -armLen, colorB, colorA);
+  // Short arms (q)
+  drawArm(0, 0, -20*sc, armLen*0.65, colorA, colorB);
+  drawArm(0, 0, 20*sc, armLen*0.65, colorB, colorA);
+
+  // Centromere
+  ctx.shadowColor = '#ffe600'; ctx.shadowBlur = 24;
+  ctx.fillStyle = '#ffe600';
+  ctx.beginPath(); ctx.arc(0, 0, 12*sc, 0, Math.PI*2); ctx.fill();
+
+  // Telomeres
+  [[-30,-armLen],[30,-armLen],[-20,armLen*0.65],[20,armLen*0.65]].forEach(([x,y]) => {
+    ctx.fillStyle = '#fff'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 16;
+    ctx.beginPath(); ctx.arc(x*sc, y, 6*sc, 0, Math.PI*2); ctx.fill();
+  });
+
+  ctx.restore();
+  ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+}
+
+function drawSel(ctx, w, h, a) {
+  const cx = w/2, cy = h/2;
+  const sc = scale;
+  const R = 130*sc;
+
+  ctx.save();
+  ctx.translate(cx, cy);
+
+  // Cytoplasm glow
+  const grad = ctx.createRadialGradient(0,0,R*0.3,0,0,R);
+  grad.addColorStop(0,'rgba(0,60,100,0.5)');
+  grad.addColorStop(1,'rgba(0,20,50,0.05)');
+  ctx.fillStyle = grad;
+  ctx.shadowColor = '#00cfff'; ctx.shadowBlur = 40;
+  ctx.beginPath(); ctx.ellipse(0,0,R,R*0.75,0,0,Math.PI*2); ctx.fill();
+
+  // Cell membrane
+  ctx.strokeStyle = colorA; ctx.lineWidth = 3; ctx.shadowBlur = 16; ctx.shadowColor = colorA;
+  ctx.setLineDash([6,4]);
+  ctx.beginPath(); ctx.ellipse(0,0,R,R*0.75,0,0,Math.PI*2); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Nucleus
+  const nR = 52*sc;
+  const ng = ctx.createRadialGradient(0,0,nR*0.2,0,0,nR);
+  ng.addColorStop(0,'rgba(180,0,255,0.4)');
+  ng.addColorStop(1,'rgba(80,0,140,0.1)');
+  ctx.fillStyle = ng;
+  ctx.strokeStyle = colorB; ctx.lineWidth = 2.5; ctx.shadowColor = colorB; ctx.shadowBlur = 20;
+  ctx.beginPath(); ctx.arc(0,0,nR,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(0,0,nR,0,Math.PI*2); ctx.stroke();
+
+  // Nucleolus
+  ctx.fillStyle = '#ffe600'; ctx.shadowColor = '#ffe600'; ctx.shadowBlur = 20;
+  ctx.beginPath(); ctx.arc(0,0,16*sc,0,Math.PI*2); ctx.fill();
+
+  // Nuclear pores
+  for (let i = 0; i < 8; i++) {
+    const px = Math.cos(a + i * Math.PI/4) * nR;
+    const py = Math.sin(a + i * Math.PI/4) * nR;
+    ctx.fillStyle = '#00cfff'; ctx.shadowColor = '#00cfff'; ctx.shadowBlur = 10;
+    ctx.beginPath(); ctx.arc(px,py,4*sc,0,Math.PI*2); ctx.fill();
+  }
+
+  // Mitochondria (orbiting)
+  for (let i = 0; i < 4; i++) {
+    const ma = a*0.3 + i * Math.PI/2;
+    const mx = Math.cos(ma) * R*0.7;
+    const my = Math.sin(ma) * R*0.45;
+    ctx.fillStyle = '#ff7e00'; ctx.shadowColor = '#ff7e00'; ctx.shadowBlur = 12;
+    ctx.beginPath(); ctx.ellipse(mx,my,14*sc,8*sc,ma,0,Math.PI*2); ctx.fill();
+  }
+
+  ctx.restore();
+  ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+}
+
+let mitPhase = 0;
+function drawMitosis(ctx, w, h, a) {
+  const cx = w/2, cy = h/2;
+  const sc = scale;
+  mitPhase += 0.002 * (speed+0.1);
+  if (mitPhase > 1) mitPhase = 0;
+
+  const phases = ['Interfase','Profase','Metafase','Anafase','Telofase'];
+  const phaseIdx = Math.floor(mitPhase * phases.length);
+  const phaseT = (mitPhase * phases.length) % 1;
+
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(a * 0.15);
+
+  const R = 90*sc;
+
+  if (phaseIdx <= 1) {
+    // Interfase/Profase: single cell condensing
+    const condensed = phaseIdx === 1 ? phaseT : 0;
+
+    const g = ctx.createRadialGradient(0,0,R*0.3,0,0,R);
+    g.addColorStop(0,'rgba(0,207,255,0.3)');
+    g.addColorStop(1,'rgba(0,50,100,0.05)');
+    ctx.fillStyle = g;
+    ctx.strokeStyle = colorA; ctx.lineWidth = 3; ctx.shadowColor = colorA; ctx.shadowBlur = 20;
+    ctx.beginPath(); ctx.ellipse(0,0,R,R*0.75,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
+
+    // Chromosomes forming
+    for (let i = 0; i < 4; i++) {
+      const ca = i * Math.PI/2 + a*0.5;
+      const cr = (40 - condensed*25)*sc;
+      ctx.strokeStyle = [colorA,colorB,'#ffe600','#b400ff'][i];
+      ctx.lineWidth = (3+condensed*5)*sc;
+      ctx.shadowColor = ctx.strokeStyle; ctx.shadowBlur = 15;
+      ctx.beginPath();
+      ctx.ellipse(Math.cos(ca)*cr, Math.sin(ca)*cr, (15+condensed*10)*sc, (10+condensed*8)*sc, ca, 0, Math.PI*2);
+      ctx.stroke();
+    }
+
+  } else if (phaseIdx === 2) {
+    // Metafase: chromosomes aligned at equator
+    ctx.strokeStyle = colorA; ctx.lineWidth = 3; ctx.shadowColor = colorA; ctx.shadowBlur = 20;
+    ctx.beginPath(); ctx.ellipse(0,0,R,R*0.75,0,0,Math.PI*2); ctx.stroke();
+
+    // Spindle fibers
+    ctx.strokeStyle = 'rgba(255,230,0,0.3)'; ctx.lineWidth = 1.5; ctx.shadowBlur = 8; ctx.shadowColor = '#ffe600';
+    for (let i = 0; i < 4; i++) {
+      const ex = (i-1.5)*30*sc;
+      ctx.beginPath(); ctx.moveTo(-R,0); ctx.lineTo(ex, 0); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(R, 0); ctx.lineTo(ex, 0); ctx.stroke();
+    }
+
+    // Chromosomes on plate
+    for (let i = 0; i < 4; i++) {
+      const ex = (i-1.5)*30*sc;
+      ctx.fillStyle = [colorA,colorB,'#ffe600','#b400ff'][i];
+      ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 16;
+      ctx.beginPath(); ctx.ellipse(ex,0,12*sc,18*sc,0,0,Math.PI*2); ctx.fill();
+    }
+
+  } else if (phaseIdx === 3) {
+    // Anafase: chromosomes moving to poles
+    const sep = phaseT * R * 0.6;
+    ctx.strokeStyle = colorA; ctx.lineWidth = 3; ctx.shadowColor = colorA; ctx.shadowBlur = 20;
+    ctx.beginPath(); ctx.ellipse(0,-sep/3,R,R*(0.75+phaseT*0.3),0,0,Math.PI*2); ctx.stroke();
+
+    for (let i = 0; i < 4; i++) {
+      const ex = (i-1.5)*30*sc;
+      const colors = [colorA,colorB,'#ffe600','#b400ff'];
+      // Top group
+      ctx.fillStyle = colors[i]; ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 16;
+      ctx.beginPath(); ctx.ellipse(ex,-sep,12*sc,14*sc,0,0,Math.PI*2); ctx.fill();
+      // Bottom group
+      ctx.fillStyle = colors[(i+2)%4];
+      ctx.beginPath(); ctx.ellipse(ex,sep,12*sc,14*sc,0,0,Math.PI*2); ctx.fill();
+    }
+
+  } else {
+    // Telofase/Sitokinesis: two new cells
+    const prog = phaseT;
+    const dist = 60*sc + prog*20*sc;
+    const ellR = R * (1 - prog*0.15);
+
+    [-1,1].forEach((side, si) => {
+      ctx.strokeStyle = [colorA,colorB][si]; ctx.lineWidth = 2.5;
+      ctx.shadowColor = ctx.strokeStyle; ctx.shadowBlur = 18;
+      ctx.beginPath(); ctx.ellipse(0,side*dist,ellR*0.65,ellR*0.55,0,0,Math.PI*2); ctx.stroke();
+      const g = ctx.createRadialGradient(0,side*dist,ellR*0.1,0,side*dist,ellR*0.55);
+      g.addColorStop(0, si===0?'rgba(0,207,255,0.2)':'rgba(255,45,120,0.2)');
+      g.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.ellipse(0,side*dist,ellR*0.65,ellR*0.55,0,0,Math.PI*2); ctx.fill();
+    });
+  }
+
+  // Phase label
+  ctx.globalAlpha = 1;
+  ctx.font = `700 ${14*sc}px Rajdhani,sans-serif`;
+  ctx.fillStyle = '#ffe600'; ctx.shadowColor = '#ffe600'; ctx.shadowBlur = 10;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  ctx.fillText(phases[phaseIdx], 0, -R*0.82);
+
+  ctx.restore();
+  ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+}
+
+let meioPhase = 0;
+function drawMeiosis(ctx, w, h, a) {
+  const cx = w/2, cy = h/2;
+  const sc = scale;
+  meioPhase += 0.0015 * (speed+0.1);
+  if (meioPhase > 1) meioPhase = 0;
+
+  const stages = ['Sel Induk (2n)','Meiosis I','Crossing Over','Meiosis II','4 Sel (n)'];
+  const stageIdx = Math.floor(meioPhase * stages.length);
+  const stageT = (meioPhase * stages.length) % 1;
+
+  ctx.save();
+  ctx.translate(cx, cy);
+
+  const R = 75*sc;
+
+  function drawCell(x, y, r, col, label, chromos) {
+    const g = ctx.createRadialGradient(x,y,r*0.2,x,y,r);
+    g.addColorStop(0, col + '44');
+    g.addColorStop(1, 'transparent');
+    ctx.fillStyle = g;
+    ctx.strokeStyle = col; ctx.lineWidth = 2.5;
+    ctx.shadowColor = col; ctx.shadowBlur = 18;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+
+    chromos.forEach(([cx2,cy2,c,rx,ry]) => {
+      ctx.fillStyle = c; ctx.shadowColor = c; ctx.shadowBlur = 14;
+      ctx.beginPath(); ctx.ellipse(x+cx2*sc,y+cy2*sc,rx*sc,ry*sc,a*0.3,0,Math.PI*2); ctx.fill();
+    });
+
+    if (label) {
+      ctx.globalAlpha = 0.9; ctx.fillStyle = '#fff'; ctx.shadowBlur = 0;
+      ctx.font = `600 ${Math.max(9,11*sc)}px Rajdhani,sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText(label, x, y+r+5);
+    }
+  }
+
+  if (stageIdx === 0) {
+    drawCell(0, 0, R, colorA, '2n = 4', [
+      [-20,-20,colorA,10,14],[20,-20,colorB,10,14],
+      [-20,20,'#ffe600',10,14],[20,20,'#b400ff',10,14]
+    ]);
+  } else if (stageIdx === 1) {
+    // Meiosis I — homologs separating
+    const sep = stageT * 100 * sc;
+    drawCell(-sep,-sep/2, R*0.85, colorA, 'n=2', [[-15,0,colorA,8,12],[15,0,colorB,8,12]]);
+    drawCell(sep,sep/2, R*0.85, colorB, 'n=2', [[-15,0,'#ffe600',8,12],[15,0,'#b400ff',8,12]]);
+  } else if (stageIdx === 2) {
+    // Crossing over
+    const mix = stageT;
+    drawCell(-80*sc, 0, R*0.75, '#00ff9d', 'Rekombinasi', [
+      [-12,0, mix>0.5?colorB:colorA, 8,12],[12,0, mix>0.5?colorA:colorB, 8,12]
+    ]);
+    // X crossing lines
+    ctx.strokeStyle = '#ffe600'; ctx.lineWidth = 2; ctx.shadowColor = '#ffe600'; ctx.shadowBlur = 12;
+    ctx.globalAlpha = mix;
+    ctx.beginPath(); ctx.moveTo(-30*sc,-20*sc); ctx.lineTo(30*sc,20*sc); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-30*sc,20*sc); ctx.lineTo(30*sc,-20*sc); ctx.stroke();
+    ctx.globalAlpha = 1;
+    drawCell(80*sc, 0, R*0.75, '#ff2d78', 'Rekombinasi', [
+      [-12,0, mix>0.5?'#b400ff':'#ffe600', 8,12],[12,0, mix>0.5?'#ffe600':'#b400ff', 8,12]
+    ]);
+  } else if (stageIdx === 3) {
+    const sep2 = stageT * 60 * sc;
+    const cells = [[-80,-sep2],[80,-sep2],[-80,sep2],[80,sep2]];
+    const cols = [colorA, colorB, '#ffe600', '#b400ff'];
+    cells.forEach(([x,y],i) => {
+      drawCell(x*sc,y, R*0.55, cols[i], '', [[0,0,cols[i],6,9]]);
+    });
+  } else {
+    // 4 haploid cells
+    const fc = [[-90,-70],[90,-70],[-90,70],[90,70]];
+    const cols = [colorA, colorB, '#ffe600', '#b400ff'];
+    fc.forEach(([x,y],i) => {
+      drawCell(x*sc, y*sc, R*0.5, cols[i], 'n', [[0,0,cols[i],5,8]]);
+    });
+    ctx.fillStyle = '#fff'; ctx.font = `600 ${14*sc}px Rajdhani`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('4 Gamet Haploid', 0, 0);
+  }
+
+  // Stage label
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#ffe600'; ctx.shadowColor = '#ffe600'; ctx.shadowBlur = 10;
+  ctx.font = `700 ${13*sc}px Rajdhani,sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  ctx.fillText(stages[stageIdx], 0, -R - 20*sc);
+
+  ctx.restore();
+  ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+}
+
+// ─────────────────────────────────────────────
+// MAIN RENDER LOOP
+// ─────────────────────────────────────────────
+function render() {
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(0,207,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < w; x += 40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for (let y = 0; y < h; y += 40) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+
+  if (!paused) angle += 0.012 * speed;
+
+  const data = topicData[currentTopic];
+  data.draw(ctx, w, h, angle);
+
+  animFrame = requestAnimationFrame(render);
+}
+
+// ─────────────────────────────────────────────
+// AR CANVAS RENDER
+// ─────────────────────────────────────────────
+const arCanvas = document.getElementById('arCanvas');
+const arCtx = arCanvas.getContext('2d');
+
+function renderAR() {
+  const frame = document.getElementById('ar-frame');
+  arCanvas.width = frame.clientWidth;
+  arCanvas.height = frame.clientHeight;
+  const w = arCanvas.width, h = arCanvas.height;
+
+  // Fake camera feed (animated gradient)
+  const t = Date.now() / 1000;
+  const g = arCtx.createRadialGradient(w/2, h/2, 50, w/2, h/2, w);
+  g.addColorStop(0, `hsla(${200+Math.sin(t)*20},80%,8%,1)`);
+  g.addColorStop(1, '#000');
+  arCtx.fillStyle = g;
+  arCtx.fillRect(0, 0, w, h);
+
+  // Scan lines
+  arCtx.fillStyle = 'rgba(0,255,157,0.015)';
+  for (let y = 0; y < h; y += 4) { arCtx.fillRect(0, y, w, 2); }
+
+  // AR marker grid
+  arCtx.strokeStyle = 'rgba(0,207,255,0.2)'; arCtx.lineWidth = 1;
+  for (let x = 0; x < w; x += 30) { arCtx.beginPath(); arCtx.moveTo(x,0); arCtx.lineTo(x,h); arCtx.stroke(); }
+  for (let y = 0; y < h; y += 30) { arCtx.beginPath(); arCtx.moveTo(0,y); arCtx.lineTo(w,y); arCtx.stroke(); }
+
+  // Corner markers (AR detection)
+  arCtx.strokeStyle = '#00ff9d'; arCtx.lineWidth = 3;
+  [[60,80],[w-60,80],[60,h-80],[w-60,h-80]].forEach(([x,y]) => {
+    arCtx.strokeRect(x-20, y-20, 40, 40);
+    arCtx.fillStyle = 'rgba(0,255,157,0.15)'; arCtx.fillRect(x-20,y-20,40,40);
+  });
+
+  // Draw 3D object in AR
+  arAngle += 0.018 * speed;
+  const data = topicData[currentTopic];
+  arCtx.save();
+  // Scale to fit AR frame
+  const arScale = Math.min(w, h) / 600;
+  arCtx.scale(arScale, arScale);
+  data.draw(arCtx, w/arScale, h/arScale, arAngle);
+  arCtx.restore();
+
+  // AR HUD
+  arCtx.fillStyle = 'rgba(0,255,157,0.8)';
+  arCtx.font = '700 11px Space Mono,monospace';
+  arCtx.fillText('AR AKTIF ●', 12, 20);
+  arCtx.fillStyle = 'rgba(0,207,255,0.7)';
+  arCtx.font = '10px Space Mono,monospace';
+  arCtx.fillText(topicData[currentTopic].title.replace(/[^\w\s—]/g,'').trim().slice(0,30), 12, h-12);
+
+  arAnimFrame = requestAnimationFrame(renderAR);
+}
+
+// ─────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────
+function setTopic(topic) {
+  currentTopic = topic;
+  document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-'+topic).classList.add('active');
+
+  const data = topicData[topic];
+  document.getElementById('overlay-title').textContent = data.title;
+  document.getElementById('overlay-text').textContent = data.text;
+
+  const tagsEl = document.getElementById('overlay-tags');
+  tagsEl.innerHTML = '';
+  data.tags.forEach(t => {
+    const s = document.createElement('span');
+    s.className = 'tag'; s.textContent = t;
+    tagsEl.appendChild(s);
+  });
+
+  const legKeys = ['leg1','leg2','leg3','leg4','leg5'];
+  data.leg.forEach((l,i) => {
+    const el = document.getElementById(legKeys[i]);
+    if (el) el.textContent = l;
+  });
+}
+
+function setView(v) {
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  if (v === 'info') {
+    const infoTopics = [
+      {title:'DNA (Asam Deoksiribonukleat)',text:'DNA tersusun dari nukleotida yang terdiri dari gula deoksiribosa, gugus fosfat, dan basa nitrogen (A,T,G,C). Membentuk struktur double helix oleh Watson & Crick (1953).'},
+      {title:'RNA (Asam Ribonukleat)',text:'RNA merupakan untai tunggal, menggunakan Urasil (U) menggantikan Timin. Peran: transkripsi (mRNA), translasi (tRNA, rRNA).'},
+      {title:'Kromosom & Gen',text:'Gen adalah segmen DNA yang mengkode protein. Alel adalah varian gen. Fenotipe = ekspresi gen + lingkungan. Genotipe = susunan gen.'},
+      {title:'Hukum Mendel',text:'Hukum I (Segregasi): alel dipisah saat pembentukan gamet. Hukum II (Asortasi bebas): gen pada kromosom berbeda bersegregasi secara independen.'},
+      {title:'Mutasi & Variasi',text:'Mutasi: perubahan urutan basa DNA. Bisa spontan atau akibat mutagen. Variasi genetik menghasilkan keragaman sifat dalam populasi.'}
+    ];
+    const overlay = document.getElementById('info-overlay');
+    let i = 0;
+    function cycleInfo() {
+      overlay.querySelector('h3').textContent = '📖 ' + infoTopics[i].title;
+      overlay.querySelector('p').textContent = infoTopics[i].text;
+      i = (i+1) % infoTopics.length;
+    }
+    cycleInfo();
+    clearInterval(window._infoCycle);
+    window._infoCycle = setInterval(cycleInfo, 4000);
+  }
+
+  if (v === '3d') {
+    clearInterval(window._infoCycle);
+    setTopic(currentTopic);
+  }
+
+  if (v === 'quiz') showQuiz();
+}
+
+// ─────────────────────────────────────────────
+// QUIZ
+// ─────────────────────────────────────────────
+const quizData = [
+  {q:'Pasangan basa nitrogen pada DNA yang benar adalah…',a:['A–U dan G–C','A–T dan G–C','A–G dan T–C','A–C dan G–T'], correct:1},
+  {q:'RNA yang berperan membawa asam amino ke ribosom adalah…',a:['mRNA','rRNA','tRNA','siRNA'], correct:2},
+  {q:'Hasil akhir meiosis adalah…',a:['2 sel diploid','4 sel haploid','2 sel haploid','4 sel diploid'], correct:1},
+  {q:'Kromosom manusia berjumlah…',a:['44','46','48','23'], correct:1},
+  {q:'Sentromer pada kromosom berfungsi sebagai…',a:['Tempat DNA','Penghubung dua kromatid','Penghasil protein','Tempat ribosom'], correct:1},
+];
+let qIdx = 0, qScore = 0;
+
+function showQuiz() {
+  const overlay = document.getElementById('info-overlay');
+  const q = quizData[qIdx];
+  overlay.innerHTML = `
+    <h3 style="font-size:.85rem;margin-bottom:8px">🧩 KUIS — Soal ${qIdx+1}/${quizData.length} | Skor: ${qScore}</h3>
+    <p style="margin-bottom:10px;font-weight:600">${q.q}</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+      ${q.a.map((ans,i)=>`<button onclick="answerQuiz(${i})" style="font-family:Rajdhani;font-size:.8rem;background:rgba(0,207,255,.08);border:1px solid rgba(0,207,255,.25);color:#e8f8ff;padding:7px;border-radius:6px;cursor:pointer;transition:all .2s">${String.fromCharCode(65+i)}. ${ans}</button>`).join('')}
+    </div>
+    <div id="quiz-feedback" style="margin-top:8px;font-size:.8rem;min-height:20px"></div>
+  `;
+}
+
+window.answerQuiz = function(choice) {
+  const q = quizData[qIdx];
+  const fb = document.getElementById('quiz-feedback');
+  if (choice === q.correct) {
+    qScore++;
+    fb.textContent = '✅ Benar!';
+    fb.style.color = '#00ff9d';
+  } else {
+    fb.textContent = `❌ Kurang tepat. Jawaban: ${String.fromCharCode(65+q.correct)}. ${q.a[q.correct]}`;
+    fb.style.color = '#ff2d78';
+  }
+  setTimeout(() => {
+    qIdx = (qIdx+1) % quizData.length;
+    if (qIdx === 0) qScore = 0;
+    showQuiz();
+  }, 1800);
+};
+
+// ─────────────────────────────────────────────
+// AR MODE
+// ─────────────────────────────────────────────
+function openAR() {
+  document.getElementById('ar-overlay').classList.add('show');
+  renderAR();
+}
+document.getElementById('close-ar').onclick = () => {
+  document.getElementById('ar-overlay').classList.remove('show');
+  cancelAnimationFrame(arAnimFrame);
+};
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+speed = 0.4;
+render();
+</script>
+</body>
+</html>
